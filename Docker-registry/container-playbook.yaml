@@ -1,0 +1,70 @@
+- name: Installa Docker e crea una Docker Registry
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Installa prerequisiti
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - python3-docker
+        state: present
+        update_cache: true
+
+    - name: Crea cartella chiave GPG
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Scarica la chiave GPG di Docker
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Aggiungi repository Docker
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/docker.sources
+        mode: "0644"
+        content: |
+          Types: deb
+          URIs: https://download.docker.com/linux/ubuntu
+          Suites: {{ ansible_distribution_release }}
+          Components: stable
+          Architectures: {{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}
+          Signed-By: /etc/apt/keyrings/docker.asc
+
+    - name: Installa pacchetti Docker
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Assicura che Docker sia avviato e abilitato al boot
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Crea volume persistente per la registry
+      community.docker.docker_volume:
+        name: registry_data
+        state: present
+
+    - name: Avvia il container della Docker Registry
+      community.docker.docker_container:
+        name: registry
+        image: registry:2
+        state: started
+        pull: true
+        restart_policy: always
+        published_ports:
+          - "5000:5000"
+        volumes:
+          - registry_data:/var/lib/registry
