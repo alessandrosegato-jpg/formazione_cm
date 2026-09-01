@@ -1,0 +1,55 @@
+- name: Build container con OS differenti
+  hosts: all
+  become: true
+  gather_facts: false
+  
+  vars:
+    containers:
+      - name: ssh-ubuntu
+        image: ssh-ubuntu-image
+        dockerfile: Dockerfile.ubuntu
+        port: 1025
+      - name: ssh-rocky
+        image: ssh-rocky-image
+        dockerfile: Dockerfile.rocky
+        port: 1026
+  
+  tasks:
+    - name: Copia i Dockerfile nella directory
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/{{ item.dockerfile }}"
+        dest: /root/{{ item.dockerfile }}
+      loop: "{{ containers }}"
+
+    - name: Genera la coppia di chiavi SSH
+      community.crypto.openssh_keypair:      
+        path: /home/vagrant/.ssh/id_ed25519
+        type: ed25519
+
+    - name: Copia la chiave nel build context
+      ansible.builtin.copy:
+        src: /home/vagrant/.ssh/id_ed25519.pub
+        dest: /root/id_ed25519.pub
+        remote_src: true
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Build immagini Docker per i container
+      community.docker.docker_image_build:
+        name: "{{ item.image }}"
+        tag: latest
+        dockerfile: "{{ item.dockerfile }}"
+        path: "/root"
+      loop: "{{ containers }}"
+
+    - name: Build container con OS differenti
+      community.docker.docker_container:
+        name: "{{ item.name }}" 
+        image: "{{ item.image }}:latest"
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "{{ item.port }}:22"
+      loop: "{{ containers }}"
+

@@ -1,0 +1,22 @@
+FROM rockylinux/rockylinux:9
+
+RUN dnf install -y sudo openssh-server && \
+    rm -rf /var/cache/dnf
+    
+RUN ssh-keygen -A
+
+RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config && \
+    sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
+    echo 'AllowUsers gino' >> /etc/ssh/sshd_config
+
+RUN useradd -m -s /bin/bash gino && \
+    echo "gino ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-gino && \
+    chmod 0440 /etc/sudoers.d/90-gino
+
+COPY id_ed25519.pub /home/gino/.ssh/authorized_keys
+RUN chmod 600 /home/gino/.ssh/authorized_keys && \
+    chown gino:gino /home/gino/.ssh/authorized_keys
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D", "-e"]
