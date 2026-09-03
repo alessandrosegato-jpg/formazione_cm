@@ -1,0 +1,17 @@
+---
+- name: Crea volume persistente per la registry
+  containers.podman.podman_volume:
+    name: "{{ volume_name }}"
+    state: present
+
+- name: Avvia il container della Docker Registry
+  containers.podman.podman_container:
+    name: "{{ container_name }}"
+    image: "{{ container_image }}"
+    state: started
+    pull: always
+    restart_policy: always
+    published_ports: 
+      - "{{ container_published_ports }}"
+    volumes: 
+      - "{{ container_volumes }}"

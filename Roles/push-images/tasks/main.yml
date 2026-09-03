@@ -1,0 +1,20 @@
+---
+- name: Configura la registry come insicure per docker
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "insecure-registries" : ["{{ registry_host }}:{{ registry_port }}"]
+      }
+  notify: Riavvia Docker
+
+- name: Ritag delle immagini da pushare
+  community.docker.docker_image_tag:
+    name: "{{ item }}:{{ image_tag }}"
+    repository: "{{ registry_host }}:{{ registry_port }}/{{ item }}:{{ image_tag }}"
+  loop: "{{ image_list }}"
+
+- name: Push delle immagini al registry
+  community.docker.docker_image_push:
+    name: "{{ registry_host }}:{{ registry_port }}/{{ item }}:{{ image_tag }}"
+  loop: "{{ image_list }}"

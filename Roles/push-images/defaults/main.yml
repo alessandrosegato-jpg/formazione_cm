@@ -1,0 +1,9 @@
+---
+registry_host: "localhost"
+registry_port: "5000"
+
+image_list:
+  - ssh-ubuntu-image
+  - ssh-rocky-image
+
+image_tag: "latest"

@@ -1,0 +1,14 @@
+---
+# Motore di container
+container_engine: docker
+
+# Registry
+volume_name: registry_data
+container_name: registry
+container_image: registry:2
+container_published_ports: "5000:5000"
+container_volumes: "{{ volume_name }}:/var/lib/registry"
+
+# Specifici per Docker
+docker_key_dir: /etc/apt/keyrings
+docker_key_url: https://download.docker.com/linux/ubuntu/gpg

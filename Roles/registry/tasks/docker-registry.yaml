@@ -1,0 +1,17 @@
+---
+- name: Crea volume persistente per la registry
+  community.docker.docker_volume:
+    name: "{{ volume_name }}"
+    state: present
+
+- name: Avvia il container della Docker Registry
+  community.docker.docker_container:
+    name: "{{ container_name }}"
+    image: "{{ container_image }}"
+    state: started
+    pull: true
+    restart_policy: always
+    published_ports: 
+      - "{{ container_published_ports }}"
+    volumes: 
+      - "{{ container_volumes }}"

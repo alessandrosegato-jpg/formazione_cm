@@ -1,0 +1,13 @@
+---
+- name: Verifica che il motore sia supportato
+  ansible.builtin.assert:
+    that:
+      - container_engine in ['docker', 'podman']
+    fail_msg: "Il motore di container '{{ container_engine }}' non è supportato. Scegliere tra 'docker' o 'podman'."
+
+- name: Installa e configura il motore container
+  ansible.builtin.include_tasks: "{{ container_engine }}-install.yaml"
+
+- name: Distribuisci la registry
+  ansible.builtin.include_tasks: "{{ container_engine }}-registry.yaml"
+

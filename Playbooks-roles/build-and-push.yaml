@@ -1,0 +1,9 @@
+---
+- name: Build immagini SSH e push sulla registry
+  hosts: all
+  become: true
+
+  roles:
+    - registry
+    - build-container
+    - push-images

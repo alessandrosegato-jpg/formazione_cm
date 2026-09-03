@@ -1,0 +1,7 @@
+- name: Build container con OS differenti
+  hosts: all
+  become: true
+  gather_facts: false
+
+  roles:
+    - build-container

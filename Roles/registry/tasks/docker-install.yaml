@@ -1,0 +1,48 @@
+- name: Installa prerequisiti
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - python3-docker
+    state: present
+    update_cache: true
+
+- name: Crea cartella chiave GPG
+  ansible.builtin.file:
+    path: "{{ docker_key_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Scarica la chiave GPG di Docker
+  ansible.builtin.get_url:
+    url: "{{ docker_key_url }}"
+    dest: "{{ docker_key_dir }}/docker.asc"
+    mode: '0644'
+
+- name: Aggiungi repository Docker
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/docker.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://download.docker.com/linux/ubuntu
+      Suites: {{ ansible_distribution_release }}
+      Components: stable
+      Architectures: {{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}
+      Signed-By: {{ docker_key_dir }}/docker.asc
+
+- name: Installa pacchetti Docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Assicura che Docker sia avviato e abilitato al boot
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true

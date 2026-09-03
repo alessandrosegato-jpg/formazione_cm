@@ -1,0 +1,38 @@
+---
+- name: Copia i Dockerfile nella directory
+  ansible.builtin.copy:
+    src: "{{ item.dockerfile }}"
+    dest: "{{ ssh_build_context }}/{{ item.dockerfile }}"
+  loop: "{{ ssh_containers }}"
+
+- name: Genera la coppia di chiavi SSH
+  community.crypto.openssh_keypair:
+    path: "{{ ssh_key_path }}"
+    type: "{{ key_type }}"
+
+- name: Copia la chiave nel build context
+  ansible.builtin.copy:
+    src: "{{ ssh_key_public_path }}"
+    dest: "{{ ssh_build_context }}/id_ed25519.pub"
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Build immagini Docker per i container
+  community.docker.docker_image_build:
+    name: "{{ item.image }}"
+    tag: latest
+    dockerfile: "{{ item.dockerfile }}"
+    path: "{{ ssh_build_context }}"
+  loop: "{{ ssh_containers }}"
+
+- name: Build container con OS differenti
+  community.docker.docker_container:
+    name: "{{ item.name }}"
+    image: "{{ item.image }}:latest"
+    state: started
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ item.port }}:22"
+  loop: "{{ ssh_containers }}"

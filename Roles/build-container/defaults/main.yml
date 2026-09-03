@@ -1,0 +1,15 @@
+---
+ssh_containers: 
+  - name: ssh-ubuntu
+    image: ssh-ubuntu-image
+    dockerfile: Dockerfile.ubuntu
+    port: 1025
+  - name: ssh-rocky
+    image: ssh-rocky-image
+    dockerfile: Dockerfile.rocky
+    port: 1026
+
+ssh_build_context: /root
+ssh_key_path: /home/vagrant/.ssh/id_ed25519
+key_type: ed25519
+ssh_key_public_path: /home/vagrant/.ssh/id_ed25519.pub

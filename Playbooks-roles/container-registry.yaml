@@ -1,0 +1,6 @@
+- name: Installa e configura una container Registry
+  hosts: all
+  become: true
+
+  roles:
+    - registry
