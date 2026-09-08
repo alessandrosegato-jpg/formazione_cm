@@ -1,11 +1,28 @@
 ---
-- name: Configura la registry come insicure per docker
+# To do 4 - Ho aggiunto un check per vedere se esiste il file daemon.json
+- name: Controlla se il file daemon.json esiste
+  ansible.builtin.stat:
+    path: /etc/docker/daemon.json
+  register: daemon_stat
+
+# To do 4 - Ho aggiunto il modulo slurp per estrarre il contenuto del file e registrarlo successivamente, viene fatto solo nel caso esistesse il file grazie al check precedente, altrimenti lo "crea" lui
+- name: Leggi daemon.json se esiste
+  ansible.builtin.slurp:
+    src: /etc/docker/daemon.json
+  register: daemon_json
+  when: daemon_stat.stat.exists
+
+# To do 4 - Ho aggiunto il task set_fact per impostare una variabile durante l'esecuzione del play, dove: prendo il contenuto del file, lo decodifico, lo modifico da a JSON a dizionario e combino al contenuto la stringa dell'insecure registry
+- name: Configurazione daemon.json
+  ansible.builtin.set_fact:
+    daemon_config: "{{ (daemon_json.content | b64decode | from_json) | combine({'insecure-registries': [registry_host ~ ':' ~ registry_port]}) }}"
+
+# To do 4 - Ho aggiunto questo modulo copy per copiare la configurazione del task precedente dentro al daemon.json, riportandolo a JSON  
+- name: Scrivi daemon.json 
   ansible.builtin.copy:
+    content: "{{ daemon_config | to_nice_json }}"
     dest: /etc/docker/daemon.json
-    content: |
-      {
-        "insecure-registries" : ["{{ registry_host }}:{{ registry_port }}"]
-      }
+    mode: '0644'
   notify: Riavvia Docker
 
 - name: Ritag delle immagini da pushare
