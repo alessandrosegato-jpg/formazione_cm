@@ -5,10 +5,12 @@
     dest: "{{ ssh_build_context }}/{{ item.dockerfile }}"
   loop: "{{ ssh_containers }}"
 
+# To do 5 - Ho aggiunto l'opzione no_log: true per evitare che dei dati sensibili vengano registrati nei log di Ansible, migliorando la sicurezza.
 - name: Genera la coppia di chiavi SSH
   community.crypto.openssh_keypair:
     path: "{{ ssh_key_path }}"
     type: "{{ key_type }}"
+  no_log: true
 
 - name: Copia la chiave nel build context
   ansible.builtin.copy:
