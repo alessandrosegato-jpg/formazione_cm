@@ -18,17 +18,12 @@
     dest: "{{ docker_key_dir }}/docker.asc"
     mode: '0644'
 
+# To do 1 - Ho sostituito il modulo copy con il modulo template per poter usare un file jinja2 più leggibile e riutilizzabile soprattutto se il contenuto cresce o se hai condizionali/loop Jinja2.
 - name: Aggiungi repository Docker
-  ansible.builtin.copy:
+  ansible.builtin.template:
+    src: docker.sources.j2
     dest: /etc/apt/sources.list.d/docker.sources
     mode: '0644'
-    content: |
-      Types: deb
-      URIs: https://download.docker.com/linux/ubuntu
-      Suites: {{ ansible_distribution_release }}
-      Components: stable
-      Architectures: {{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}
-      Signed-By: {{ docker_key_dir }}/docker.asc
 
 - name: Installa pacchetti Docker
   ansible.builtin.apt:

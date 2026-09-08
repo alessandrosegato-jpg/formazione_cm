@@ -5,8 +5,16 @@
       - container_engine in ['docker', 'podman']
     fail_msg: "Il motore di container '{{ container_engine }}' non è supportato. Scegliere tra 'docker' o 'podman'."
 
-- name: Installa e configura il motore container
+# To do 2 - Ho aggiunto un task per verificare se il motore di container è già installato prima di eseguire l'installazione. In questo modo evitiamo di reinstallare il motore se è già presente.
+- name: Check se il motore di container è già installato
+  ansible.builtin.stat:
+    path: "/usr/bin/{{ container_engine }}"
+  register: container_engine_installed
+
+# To do 2 - Ho modficato il task per installare il motore di container in modo condizionale, eseguendo l'installazione solo se il motore non è già presente.
+- name: Installa il motore di container se non è presente
   ansible.builtin.include_tasks: "{{ container_engine }}-install.yaml"
+  when: not container_engine_installed.stat.exists
 
 - name: Distribuisci la registry
   ansible.builtin.include_tasks: "{{ container_engine }}-registry.yaml"
