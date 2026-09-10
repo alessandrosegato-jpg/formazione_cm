@@ -1,0 +1,28 @@
+FROM ubuntu:24.04
+
+RUN apt-get update && \
+    apt-get install -y sudo openssh-server docker.io && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /var/run/sshd && \
+    sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config && \
+    sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
+    echo 'AllowUsers gino' >> /etc/ssh/sshd_config
+
+RUN useradd -m -s /bin/bash gino && \
+    usermod -aG docker gino && \
+    echo "gino ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-gino && \
+    chmod 0440 /etc/sudoers.d/90-gino
+
+RUN mkdir -p /etc/docker && \
+    echo '{"insecure-registries":["192.168.3.2:5000"]}' > /etc/docker/daemon.json
+
+COPY id_ed25519.pub /home/gino/.ssh/authorized_keys
+RUN chmod 600 /home/gino/.ssh/authorized_keys && \
+    chown gino:gino /home/gino/.ssh/authorized_keys
+
+EXPOSE 22
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

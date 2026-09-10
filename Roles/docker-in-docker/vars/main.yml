@@ -1,0 +1,7 @@
+# File spediti dentro files/
+dockerfile_agent: Dockerfile.ubuntu
+dockerfile_entrypoint: Dockerfile.ubuntu.entry
+entrypoint_script: entrypoint.sh
+
+# Segue sempre ssh_key_path per restare coerente
+ssh_key_public_path: "{{ ssh_key_path }}.pub"

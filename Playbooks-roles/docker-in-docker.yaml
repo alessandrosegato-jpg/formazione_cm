@@ -1,0 +1,6 @@
+- name: Build container Docker-in-Docker 
+  hosts: all
+  become: true
+
+  roles:
+    - docker-in-docker

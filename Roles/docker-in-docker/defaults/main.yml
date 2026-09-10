@@ -1,0 +1,11 @@
+---
+# Variabili per container 
+container_name: ssh-ubuntu
+container_image: ssh-ubuntu-image
+host_port: 1027
+
+# Percorsi legati all'ambiente / alla macchina
+ssh_build_context: /root
+ssh_key_path: /home/vagrant/.ssh/id_ed25519
+key_type: ed25519
+jenkins_workspace: /srv/condivisa

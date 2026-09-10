@@ -200,3 +200,10 @@ ssh -i /home/vagrant/.ssh/id_ed25519 -p 1026 gino@localhost   # Rocky
 
 ---
 
+## To Do:
+
+1 - sostituire sul docker-install dal modulo copy utilizzando il modulo template (verificare che non ce ne siano altri, in caso sostituisci tutto con template)
+2 - check prima di eseguire install docker o podman se non siano gia installati
+3 - check sulla differenza tra le variabili nei ruoli: defaults o vars e in caso spostarle nel punto giusto
+4 - crea un /etc/docker/daemon.json di esempio, poi al task dove metti gli insecure registy, utilizza blockinfile o lineinfile
+5 - studiarti per bene l'opzione di ansible NO_LOG e in caso implementarla dove pensi che serva

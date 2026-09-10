@@ -1,0 +1,65 @@
+---
+- name: Copia Dockerfile.entrypoint nella directory di build
+  ansible.builtin.copy:
+    src: "{{ dockerfile_entrypoint }}"
+    dest: "{{ ssh_build_context }}/{{ dockerfile_entrypoint }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Genera la coppia di chiavi SSH
+  community.crypto.openssh_keypair:
+    path: "{{ ssh_key_path }}"
+    type: "{{ key_type }}"
+  no_log: true
+
+- name: Copia la chiave pubblica nel build context
+  ansible.builtin.copy:
+    src: "{{ ssh_key_public_path }}"
+    dest: "{{ ssh_build_context }}/id_ed25519.pub"
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copia script di entrypoint nel build context
+  ansible.builtin.copy:
+    src: "{{ entrypoint_script }}"
+    dest: "{{ ssh_build_context }}/entrypoint.sh"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copia Dockerfile.ubuntu sull'agent remoto
+  ansible.builtin.copy:
+    src: "{{ dockerfile_agent }}"
+    dest: "{{ jenkins_workspace }}/{{ dockerfile_agent }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copia chiave SSH pubblica sull'agent remoto
+  ansible.builtin.copy:
+    src: "{{ ssh_key_public_path }}"
+    dest: "{{ jenkins_workspace }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Build immagine con SSH + Docker
+  community.docker.docker_image_build:
+    name: "{{ container_image }}"
+    tag: latest
+    dockerfile: "{{ dockerfile_entrypoint }}"
+    path: "{{ ssh_build_context }}"
+
+- name: Build container con SSH + Docker
+  community.docker.docker_container:
+    name: "{{ container_name }}"
+    image: "{{ container_image }}:latest"
+    state: started
+    privileged: true
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ host_port }}:22"

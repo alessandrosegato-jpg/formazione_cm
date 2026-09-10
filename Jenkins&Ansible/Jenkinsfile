@@ -1,0 +1,33 @@
+pipeline {
+  agent { label 'docker' }
+
+  environment {
+    REGISTRY = '192.168.3.2:5000'
+    IMAGE = 'ssh-docker'
+    TAG = "1.0.${BUILD_NUMBER}"
+  }
+
+  stages {
+    stage('Build immagine') {
+      steps {
+        sh "docker build -t ${IMAGE}:${TAG} -f /home/jenkins/agent/Dockerfile.ubuntu /home/jenkins/agent"
+      }
+    }
+
+    stage('Tag immagine') {
+      steps {
+        sh """
+          docker tag ${IMAGE}:${TAG} ${REGISTRY}/${IMAGE}:${TAG}
+        """
+      }
+    }
+
+    stage('Push immagine') {
+      steps {
+        sh """
+          docker push ${REGISTRY}/${IMAGE}:${TAG}
+        """
+      }
+    }
+  }
+}
