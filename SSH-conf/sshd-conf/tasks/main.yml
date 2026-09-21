@@ -1,5 +1,5 @@
 ---
-- name: Importa le task in base all'hostname 
+- name: Importa le task in base all'hostname
   ansible.builtin.include_tasks: "{{ inventory_hostname }}.yaml"
 
 - name: Importa configurazione SSH dal template

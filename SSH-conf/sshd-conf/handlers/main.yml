@@ -1,3 +1,4 @@
+---
 - name: Riavvia ssh
   ansible.builtin.service:
     name: sshd

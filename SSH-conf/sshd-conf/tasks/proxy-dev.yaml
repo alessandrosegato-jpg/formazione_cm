@@ -1,3 +1,4 @@
+---
 - name: Crea utente sviluppatore
   ansible.builtin.user:
     name: "{{ dev_name }}"

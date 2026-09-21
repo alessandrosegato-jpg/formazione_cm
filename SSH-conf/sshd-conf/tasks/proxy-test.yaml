@@ -1,3 +1,4 @@
+---
 - name: Crea utente tester
   ansible.builtin.user:
     name: "{{ test_name }}"
