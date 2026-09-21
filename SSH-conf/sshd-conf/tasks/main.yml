@@ -1,0 +1,10 @@
+---
+- name: Importa le task in base all'hostname 
+  ansible.builtin.include_tasks: "{{ inventory_hostname }}.yaml"
+
+- name: Importa configurazione SSH dal template
+  ansible.builtin.template:
+    src: ssh-conf.j2
+    dest: /etc/ssh/sshd_config.d/01-users.conf
+    mode: '0644'
+  notify: Riavvia ssh

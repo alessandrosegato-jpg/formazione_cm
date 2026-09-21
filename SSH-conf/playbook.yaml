@@ -1,0 +1,6 @@
+- name: Configura ssh
+  hosts: proxy
+  become: true
+
+  roles:
+    - sshd-conf

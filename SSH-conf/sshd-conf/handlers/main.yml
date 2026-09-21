@@ -1,0 +1,9 @@
+- name: Riavvia ssh
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+
+- name: Riavvia rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted

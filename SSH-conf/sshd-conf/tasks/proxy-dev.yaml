@@ -1,0 +1,18 @@
+- name: Crea utente sviluppatore
+  ansible.builtin.user:
+    name: "{{ dev_name }}"
+    shell: "{{ dev_shell }}"
+    create_home: true
+    state: present
+
+- name: Aggiungi chiave pubblica ad authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ dev_name }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+
+- name: Aggiungi chiave pubblica ad authorized_keys di root
+  ansible.posix.authorized_key:
+    user: root
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"

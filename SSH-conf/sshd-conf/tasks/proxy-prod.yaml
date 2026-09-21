@@ -1,0 +1,28 @@
+---
+- name: Crea gruppo administrators
+  ansible.builtin.group:
+    name: administrators
+    state: present
+
+- name: Crea utente admin
+  ansible.builtin.user:
+    name: "{{ prod_name }}"
+    group: "{{ prod_group }}"
+    shell: "{{ prod_shell }}"
+    create_home: true
+    state: present
+
+- name: Aggiungi chiave pubblica ad authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ prod_name }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+
+- name: Log SSH dedicato
+  ansible.builtin.template:
+    src: rsyslog-conf.j2
+    dest: /etc/rsyslog.d/51-prod-ssh.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Riavvia rsyslog

@@ -1,0 +1,19 @@
+PasswordAuthentication no
+PermitEmptyPasswords no
+PubkeyAuthentication yes
+PubkeyAcceptedAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+MaxAuthTries 2
+{% if inventory_hostname == 'proxy-dev' %}
+AllowUsers sviluppatore root
+{%- endif %}
+{% if inventory_hostname == 'proxy-test' %}
+AllowUsers tester root
+{%- endif %}
+{% if inventory_hostname == 'proxy-prod' %}
+LogLevel VERBOSE
+PermitRootLogin no
+Port 2222
+AllowUsers admin
+AllowGroups administrators
+SyslogFacility LOCAL5
+{%- endif %}

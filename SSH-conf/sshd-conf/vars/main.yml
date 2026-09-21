@@ -1,0 +1,13 @@
+---
+# Variabili Dev
+dev_name: sviluppatore
+dev_shell: /bin/bash
+
+# Variabili Test
+test_name: tester
+test_shell: /bin/bash
+
+# Variabili Prod
+prod_name: admin
+prod_group: administrators
+prod_shell: /bin/bash

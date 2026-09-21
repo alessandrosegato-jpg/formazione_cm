@@ -1,0 +1,8 @@
+[proxy]
+proxy-dev ansible_host=192.168.3.60
+proxy-test ansible_host=192.168.3.61
+proxy-prod ansible_host=192.168.3.62
+
+
+[all:vars]
+ansible_user=vagrant
