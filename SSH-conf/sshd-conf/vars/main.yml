@@ -1,13 +1,44 @@
 ---
-# Variabili Dev
-dev_name: sviluppatore
-dev_shell: /bin/bash
+# Creazione utenti
+host_users:
+  proxy-dev:
+    - name: sviluppatore
+      shell: /bin/bash
+      pubkey: "~/.ssh/id_ed25519.pub"
+    - name: root
+      shell: /bin/bash
+      pubkey: "~/.ssh/id_ed25519.pub"
+  proxy-test:
+    - name: tester
+      shell: /bin/bash
+      pubkey: "~/.ssh/id_ed25519.pub"
+    - name: root
+      shell: /bin/bash
+      pubkey: "~/.ssh/id_ed25519.pub"
+  proxy-prod:
+    - name: admin
+      shell: /bin/bash
+      groups: administrators
+      pubkey: "~/.ssh/id_ed25519.pub"
 
-# Variabili Test
-test_name: tester
-test_shell: /bin/bash
-
-# Variabili Prod
-prod_name: admin
-prod_group: administrators
-prod_shell: /bin/bash
+# Config sshd
+sshd_host_configs:
+  proxy-dev:
+    port: 22
+    permit_root_login: "yes"
+    allow_users: "sviluppatore root"
+    allow_groups: ""
+    syslog_facility: "AUTH"
+  proxy-test:
+    port: 22
+    permit_root_login: "yes"
+    allow_users: "tester root"
+    allow_groups: ""
+    syslog_facility: "AUTH"
+  proxy-prod:
+    port: 2222
+    permit_root_login: "no"
+    allow_users: "admin"
+    allow_groups: "administrators"
+    syslog_facility: "local5"
+    log_level: "VERBOSE"

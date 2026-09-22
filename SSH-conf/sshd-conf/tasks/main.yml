@@ -1,6 +1,45 @@
 ---
-- name: Importa le task in base all'hostname
-  ansible.builtin.include_tasks: "{{ inventory_hostname }}.yaml"
+- name: Verifica che le variabili necessarie siano definite
+  ansible.builtin.assert:
+    that:
+      - sshd_host_configs is defined
+      - host_users is defined
+      - inventory_hostname in sshd_host_configs
+      - inventory_hostname in host_users
+    fail_msg: "Variabili mancanti o host non presente nei dizionari di configurazione"
+    success_msg: "Configurazione presente per {{ inventory_hostname }}"
+
+- name: Crea gruppo administrators
+  ansible.builtin.group:
+    name: administrators
+    state: present
+  when: inventory_hostname == 'proxy-prod'
+
+- name: Crea gli utenti dell'host
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: "{{ item.shell }}"
+    groups: "{{ item.groups | default(omit) }}"
+    create_home: true
+    state: present
+  loop: "{{ host_users[inventory_hostname] }}"
+
+- name: Aggiungi le chiavi pubbliche ad authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    state: present
+    key: "{{ lookup('file', item.pubkey) }}"
+  loop: "{{ host_users[inventory_hostname] }}"
+
+- name: Log SSH dedicato (solo prod)
+  ansible.builtin.template:
+    src: rsyslog-conf.j2
+    dest: /etc/rsyslog.d/51-prod-ssh.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Riavvia rsyslog
+  when: inventory_hostname == 'proxy-prod'
 
 - name: Importa configurazione SSH dal template
   ansible.builtin.template:

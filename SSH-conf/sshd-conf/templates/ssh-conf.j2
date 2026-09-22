@@ -1,19 +1,14 @@
+{% set cfg = sshd_host_configs[inventory_hostname] %}
 PasswordAuthentication no
 PermitEmptyPasswords no
 PubkeyAuthentication yes
 PubkeyAcceptedAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
 MaxAuthTries 2
-{% if inventory_hostname == 'proxy-dev' %}
-AllowUsers sviluppatore root
-{%- endif %}
-{% if inventory_hostname == 'proxy-test' %}
-AllowUsers tester root
-{%- endif %}
-{% if inventory_hostname == 'proxy-prod' %}
-LogLevel VERBOSE
-PermitRootLogin no
-Port 2222
-AllowUsers admin
-AllowGroups administrators
-SyslogFacility LOCAL5
-{%- endif %}
+Port {{ cfg.port }}
+PermitRootLogin {{ cfg.permit_root_login }}
+AllowUsers {{ cfg.allow_users }}
+{% if cfg.allow_groups %}
+AllowGroups {{ cfg.allow_groups }}
+{% endif %}
+SyslogFacility {{ cfg.syslog_facility }}
+LogLevel {{ cfg.log_level | default('INFO') }}
